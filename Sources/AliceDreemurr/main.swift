@@ -1,6 +1,7 @@
 import DreemurrCore
 import Sword
 import Logging
+import Foundation
 
 print("""
 Angelbot v2.0
@@ -8,19 +9,23 @@ Built with Dreemurr Core.
 (C) 2019 Project Alice. All rights reserved.
 """)
 
+// Create a configuration from environment variables if possible.
 let testConfiguration = """
 {
-\"name\": \"Alice Angel\",
+\"name\": \"\("Alice Angel")\",
 \"currentGame\": \"Portal 2\",
-\"token\": \"NTg5NTc2MzMxNzA0OTI2MjA4.XQVr7Q.K-8iW0luEhpqbnjczF2JFxD1g-M\"
+\"token\": \"\(DreemurrVM.getToken() ?? "notoken")"
 }
 """
 
+// Instantiate the logger for the main environment.
 let logger = Logger(label: "app.aliceos.dreemurr-alice.main")
 
+// Create a Determination config from the JSON string.
 logger.info("Creating new determination from JSON configs.")
 let testDetermination = Determination(fromJson: testConfiguration)
 
+// Check if the configuration succeeded.
 if testDetermination != nil {
     logger.info("New determination accepted. Creating a new Dreemurr instance.")
     let aliceAngel = Alice(determinedFrom: testDetermination!)
@@ -49,4 +54,7 @@ if testDetermination != nil {
     })
     logger.info("Connecting Alice to Discord.")
     aliceAngel.connect()
+} else {
+    logger.error("Determination not accepted. Possibly malformed or missing.")
+    exit(1)
 }
