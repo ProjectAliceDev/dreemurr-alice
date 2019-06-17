@@ -17,6 +17,7 @@ public enum DreemurrCommands {
     case ping
     case qt
     case aboutme
+    case asriel
 }
 
 /**
@@ -42,6 +43,8 @@ public class Alice: Dreemurr {
             return .qt
         case "!aboutme":
             return .aboutme
+        case "!asriel":
+            return .asriel
         default:
             throw DreemurrError.invalidCommand
         }
@@ -74,6 +77,10 @@ public class Alice: Dreemurr {
         return possibleEntries.randomElement() ?? "I niot qt!"
     }
     
+    public func getRelease(of: String) {
+        
+    }
+    
     /**
         Runs a command based off of a token.
         - parameter command: The token to run as a command.
@@ -102,6 +109,8 @@ public class Alice: Dreemurr {
             message.reply(with: getQtMessage())
         case .aboutme:
             message.reply(with: self.introduceSelf())
+        case .asriel:
+            throw DreemurrError.partialOrIncompleteSoul
         default:
             throw DreemurrError.invalidCommand
         }
