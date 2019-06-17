@@ -32,7 +32,7 @@ public class Alice: Dreemurr {
         }
     }
     
-    public func parseCommand(command: DreemurrCommands, message: Message) {
+    public func parseCommand(command: DreemurrCommands, message: Message) throws {
         switch command {
         case .help:
             message.reply(with: self.showHelp(description: """
@@ -50,6 +50,8 @@ public class Alice: Dreemurr {
             message.reply(with: "Pong.")
         case .qt:
             message.reply(with: "I niot qt!")
+        default:
+            throw DreemurrError.invalidCommand
         }
     }
 }
