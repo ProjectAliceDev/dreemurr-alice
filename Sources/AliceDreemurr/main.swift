@@ -23,6 +23,8 @@ let testDetermination = Determination(fromJson: testConfiguration)
 if testDetermination != nil {
     logger.info("New determination accepted. Creating a new Dreemurr instance.")
     let aliceAngel = Alice(determinedFrom: testDetermination!)
+    
+    // Assign the parser and command runner by watching any message that comes in.
     aliceAngel.onWatchMessages(doThis: { data in
         let message = data as! Message
         
@@ -44,8 +46,15 @@ if testDetermination != nil {
             }
             
         }
-        
     })
+    
+    // Welcome each new user.
+    aliceAngel.onNewMemberAdded(doThis: { data in
+        let newMember = data as! User
+        print("Welcome to The Studio, \(newMember.username ?? "newcomer")~! Make sure you follow the rules set in #welcome.")
+    })
+    
+    // Connect to Discord.
     logger.info("Connecting Alice to Discord.")
     aliceAngel.connect()
 } else {
