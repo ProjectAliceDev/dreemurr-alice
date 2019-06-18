@@ -50,8 +50,15 @@ if testDetermination != nil {
     
     // Welcome each new user.
     aliceAngel.onNewMemberAdded(doThis: { data in
-        let newMember = data as! User
-        print("Welcome to The Studio, \(newMember.username ?? "newcomer")~! Make sure you follow the rules set in #welcome.")
+        logger.info("New member has joined.")
+        let newData = data as! (Guild, Member)
+        let newMember = newData.1
+        let thisGuild = newData.0
+        aliceAngel.sendMessage(
+            to: thisGuild.channels.filter({ (sf: Snowflake, channel: GuildChannel) in
+            return channel.name != nil && (channel.name! == "general")
+        })[0].key,
+            content: "Welcome to The Studio, \("@\(newMember.user.username ?? "user")#\(newMember.user.discriminator ?? "0000")")~! Make sure you read and understand the rules in #welcome before continuing. Happy modding!")
     })
     
     // Connect to Discord.
