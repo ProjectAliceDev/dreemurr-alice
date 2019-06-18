@@ -10,13 +10,7 @@ Built with Dreemurr Core.
 """)
 
 // Create a configuration from environment variables if possible.
-let testConfiguration = """
-{
-\"name\": \"\("Alice Angel")\",
-\"currentGame\": \"Portal 2\",
-\"token\": \"\(DreemurrVM.getToken() ?? "notoken")"
-}
-"""
+let testConfiguration = DreemurrEnvironment.createEnvironmentVariablesAsDecodableJSON(nameDefaultsTo: "Alice Angel", gameDefaultsTo: "Bendy and the Ink Machine")
 
 // Instantiate the logger for the main environment.
 let logger = Logger(label: "app.aliceos.dreemurr-alice.main")

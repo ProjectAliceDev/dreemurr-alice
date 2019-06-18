@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "AliceDreemurr",
     dependencies: [
-        .package(url: "https://github.com/ProjectAliceDev/dreemurr", from: "0.1.4"),
+        .package(url: "https://github.com/ProjectAliceDev/dreemurr", from: "0.1.5"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
     ],
     targets: [
