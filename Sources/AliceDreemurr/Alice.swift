@@ -18,6 +18,7 @@ public enum DreemurrCommands {
     case qt
     case aboutme
     case asriel
+    case getrelease
 }
 
 /**
@@ -45,6 +46,8 @@ public class Alice: Dreemurr {
             return .aboutme
         case "!asriel":
             return .asriel
+        case _ where input.starts(with: "!getrelease"):
+            return .getrelease
         default:
             throw DreemurrError.invalidCommand
         }
@@ -77,8 +80,65 @@ public class Alice: Dreemurr {
         return possibleEntries.randomElement() ?? "I niot qt!"
     }
     
-    public func getRelease(of: String) {
-        
+    /**
+        Create an embed containing the latest release of a GitHub repository from Project Alice.
+        - parameter of: The full command that was executed
+        - returns: An embed that contains the important information pertaining to a GitHub release (`Embed`)
+     */
+    public func getRelease(of: String) throws -> Embed {
+        let args = self.asArguments(command: of, includeCommand: false)
+        logger.info("Received arguments: \(args)")
+        switch args.count {
+        case 0: throw AliceError.missingArguments
+        case 1:
+            do {
+                let release = try getLatestReleaseData(repo: args[0])
+                if release != nil {
+                    var releaseEmbed = Embed()
+                    releaseEmbed.title = "Latest Release: \(release?.name ?? "Release Name")"
+                    releaseEmbed.description = """
+                    Release version: **\(release?.tag_name ?? "vX.X.X")**
+                    
+                    Details:
+                    \(release?.body ?? "No description provided.")
+                    """
+                    releaseEmbed.url = release?.url
+                    return releaseEmbed
+                } else {
+                    throw AliceError.releaseIsNil
+                }
+            } catch {
+                throw AliceError.requestFailed
+            }
+        default: throw AliceError.argumentMismatch
+        }
+    }
+    
+    /**
+        Makes an HTTP request to get GitHub release data and turn it into a `GithubRelease` struct.
+        - parameter repo: The name of the repository to get.
+     */
+    public func getLatestReleaseData(repo: Substring) throws -> GithubRelease? {
+        let request = URLRequest(url: NSURL(string: "https://api.github.com/repos/projectalicedev/\(repo)/releases/latest")! as URL)
+        do {
+            let response: AutoreleasingUnsafeMutablePointer<URLResponse?>? = nil
+            let data = try NSURLConnection.sendSynchronousRequest(request, returning: response)
+            
+            let serializedJSON = try JSONSerialization.jsonObject(with: data, options: [.allowFragments]) as? [String : Any]
+            
+            let jsonString = """
+            {
+            \"name\": \"\(serializedJSON?["name"] ?? "Release Name")\",
+            \"body\": \"\(serializedJSON?["body"] ?? "Release body")\",
+            \"url\": \"\(serializedJSON?["html_url"] ?? "Release URL")\",
+            \"tag_name\": \"\(serializedJSON?["tag_name"] ?? "Release Version")\",
+            }
+            """
+            
+            return GithubRelease(fromJson: jsonString)
+        } catch {
+            throw AliceError.requestFailed
+        }
     }
     
     /**
@@ -111,8 +171,27 @@ public class Alice: Dreemurr {
             message.reply(with: self.introduceSelf())
         case .asriel:
             throw DreemurrError.partialOrIncompleteSoul
+        case .getrelease:
+            do {
+                let releaseEmbed = try self.getRelease(of: message.content)
+                message.reply(with: releaseEmbed)
+            } catch AliceError.missingArguments {
+                message.reply(with: "Error: `!getrelease` requires 1 parameter.")
+            } catch AliceError.argumentMismatch {
+                message.reply(with: "Error: `!getrelease` requires **1** parameter exactly.")
+            } catch AliceError.requestFailed {
+                message.reply(with: "Error: `!getrelease` request failed. This could be because the repository doesn't exist or the releases aren't stable enough.")
+            }
         default:
             throw DreemurrError.invalidCommand
         }
     }
+}
+
+public enum AliceError: Error {
+    case missingArguments
+    case argumentMismatch
+    case releaseIsNil
+    case noSuchRepository
+    case requestFailed
 }
