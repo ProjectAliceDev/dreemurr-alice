@@ -19,6 +19,7 @@ public enum DreemurrCommands {
     case aboutme
     case asriel
     case getrelease
+    case cuddle
 }
 
 /**
@@ -46,6 +47,8 @@ public class Alice: Dreemurr {
             return .aboutme
         case "!asriel":
             return .asriel
+        case "!cuddle":
+            return .cuddle
         case _ where input.starts(with: "!getrelease"):
             return .getrelease
         default:
@@ -78,6 +81,23 @@ public class Alice: Dreemurr {
             "You aren't entertaining anyone with that."
         ]
         return possibleEntries.randomElement() ?? "I niot qt!"
+    }
+    
+    /**
+     Gets a random ping message.
+     */
+    public func getCuddleMessage() -> String {
+        let possibleEntries = [
+            "I get it if that's your thing, but I'm not comfortable doing that.",
+            "Don't you think I get enough cuddles from that fluffy monster already (unwillingly, mind you)?",
+            "You're gonna weird Sayonika out by doing that.",
+            "No.",
+            "I'm not your girlfriend, you know.",
+            "Stop that. You're making yourself look like a fool.",
+            "I really don't wanna.",
+            "Please. It's already tiring to have to deal with Sayonika and, uh, that guy, pulling that crap on me."
+        ]
+        return possibleEntries.randomElement() ?? "Please don't."
     }
     
     /**
@@ -158,19 +178,18 @@ public class Alice: Dreemurr {
 
             **Bot Commands**
             - !aboutme - Alias of '!introduce'.
+            - !cuddle - Wait, how did this even get here? 🤔
+            - !getrelease [reponame] - Gets the latest stable release of a given repository name from Project Alice.
             - !qt - Tell the bot she's a Qt.
             """))
-        case .introduce:
-            message.reply(with: self.introduceSelf())
-        case .ping:
-            message.reply(with: getPingMessage())
+        case .introduce: message.reply(with: self.introduceSelf())
+        case .ping: message.reply(with: getPingMessage())
         case .qt:
             message.addReaction("🚫")
             message.reply(with: getQtMessage())
-        case .aboutme:
-            message.reply(with: self.introduceSelf())
-        case .asriel:
-            throw DreemurrError.partialOrIncompleteSoul
+        case .cuddle: message.reply(with: self.getCuddleMessage())
+        case .aboutme: message.reply(with: self.introduceSelf())
+        case .asriel: throw DreemurrError.partialOrIncompleteSoul
         case .getrelease:
             do {
                 let releaseEmbed = try self.getRelease(of: message.content)
@@ -182,8 +201,7 @@ public class Alice: Dreemurr {
             } catch AliceError.requestFailed {
                 message.reply(with: "Error: `!getrelease` request failed. This could be because the repository doesn't exist or the releases aren't stable enough.")
             }
-        default:
-            throw DreemurrError.invalidCommand
+        default: throw DreemurrError.invalidCommand
         }
     }
 }
